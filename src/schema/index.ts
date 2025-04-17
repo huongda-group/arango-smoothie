@@ -3,7 +3,6 @@ import {
   arrayTypeFactory,
   BooleanType,
   booleanTypeFactory,
-  CoreType,
   DateType,
   dateTypeFactory,
   EmbedType,
@@ -16,7 +15,6 @@ import {
   referenceTypeFactory
 } from './types';
 import StringType, { stringTypeFactory } from './types/string';
-import { BuildSchemaError } from './errors';
 import { SchemaIndex, SchemaQuery } from '../model/index/types/index.types';
 import { getGlobalPlugins } from '../plugins/global-plugin-handler';
 import { buildFields, validate } from './helpers';
@@ -34,6 +32,8 @@ import {
 } from './interfaces/schema.types';
 import { cast, CAST_STRATEGY, CastOptions } from '../utils/cast-strategy';
 import { mergeHooks } from './helpers/fn-schema';
+import { CoreType } from "./types/core";
+import BuildSchemaError from "./error/build-schema";
 
 const addTimestamp = (obj, field, currentTime) => {
   if (obj[field]) {
