@@ -1,5 +1,5 @@
-import { getOttomanInstances, Ottoman } from '../src';
-import { bucketName, connectionString, password, username } from './testData';
+import { getArangoSmoothieInstances, ArangoSmoothie } from '../src';
+import { connectionString } from './testData';
 
 beforeEach(async () => {
   let options = {};
@@ -7,17 +7,12 @@ beforeEach(async () => {
     options = { collectionName: '_default' };
   }
 
-  const ottoman = new Ottoman(options);
-  await ottoman.connect({
-    password,
-    username,
-    connectionString,
-    bucketName,
-  });
+  const ottoman = new ArangoSmoothie(options);
+  await ottoman.connect(connectionString);
 });
 
 afterEach(async () => {
-  for (const instance of getOttomanInstances()) {
+  for (const instance of getArangoSmoothieInstances()) {
     await instance.close();
   }
 });

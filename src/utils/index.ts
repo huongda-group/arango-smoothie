@@ -1,6 +1,23 @@
-export { isDocumentNotFoundError } from './is-not-found';
-export { VALIDATION_STRATEGY } from './validation.strategy';
-export { is, isSchemaTypeSupported, isSchemaFactoryType } from './is-type';
-export { set } from './environment-set';
-export { setValueByPath } from './setValueByPath';
-export { getValueByPath } from './getValueByPath';
+import { CAST_STRATEGY, CoreType } from "../schema/types/core";
+import ValidationError from "../schema/error/validation";
+
+const is = (val, type): boolean => ![undefined, null].includes(val) && (val.name === type.name || val.constructor.name === type.name);
+
+const checkCastStrategy = (value: unknown, strategy: CAST_STRATEGY, type: CoreType) => {
+  switch (strategy) {
+    case CAST_STRATEGY.KEEP:
+    case CAST_STRATEGY.DEFAULT_OR_KEEP:
+      return value;
+    case CAST_STRATEGY.THROW:
+      throw new ValidationError(`Property '${type.name}' must be of type '${type.typeName}'`);
+    case CAST_STRATEGY.DROP:
+    case CAST_STRATEGY.DEFAULT_OR_DROP:
+    default:
+      return undefined;
+  }
+};
+
+export default {
+  is,
+  checkCastStrategy
+}

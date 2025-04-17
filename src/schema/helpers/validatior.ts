@@ -1,8 +1,11 @@
-import { Schema } from '../schema';
-import { BuildSchemaError, ValidationError } from '../errors';
-import { ValidatorFunction, ValidatorOption } from '../interfaces/schema.types';
+export interface ValidatorOption {
+  regexp: RegExp;
+  message: string;
+}
 
-export const applyValidator = (
+export type ValidatorFunction = (value: unknown) => void;
+
+export default (
   val: unknown,
   validator: ValidatorOption | ValidatorFunction | string | undefined,
   name?: string,

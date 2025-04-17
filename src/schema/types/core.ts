@@ -1,14 +1,44 @@
-import { applyValidator } from '../helpers';
-import { ValidationError } from '../errors';
-import {
-  CoreTypeOptions,
-  IOttomanType,
-  RequiredFunction,
-  RequiredOption,
-  ValidatorFunction,
-  ValidatorOption,
-} from '../interfaces/schema.types';
-import { VALIDATION_STRATEGY } from '../../utils';
+import applyValidator, { ValidatorOption } from '../helpers/validatior';
+import ValidationError from '../error/validation';
+
+export enum VALIDATION_STRATEGY {
+  STRICT = 'strict',
+  EQUAL = 'equal',
+}
+export interface CoreTypeOptions {
+  required?: boolean | RequiredOption | RequiredFunction;
+  /**
+   * If truthy, Ottoman will disallow changes to this path once the document is saved to the database for the first time.
+   **/
+  immutable?: boolean;
+  default?: unknown;
+  validator?: ValidatorOption | ValidatorFunction | string;
+}
+
+export enum CAST_STRATEGY {
+  KEEP = 'keep',
+  DROP = 'drop',
+  THROW = 'throw',
+  DEFAULT_OR_DROP = 'defaultOrDrop',
+  DEFAULT_OR_KEEP = 'defaultOrKeep',
+}
+
+export abstract class IType {
+  protected constructor(public name: string, public typeName: string) {}
+  abstract cast(value: unknown, strategy?: CAST_STRATEGY): unknown;
+  abstract validate(value: unknown, strict?: boolean): unknown;
+}
+
+export type RequiredFunction = () => boolean | RequiredOption;
+
+export interface RequiredOption {
+  val: boolean;
+  message: string;
+}
+
+export type ValidatorFunction = (value: unknown) => void;
+
+export type AutoFunction = () => unknown;
 
 /**
  *  @param name of field in schema
@@ -19,7 +49,7 @@ import { VALIDATION_STRATEGY } from '../../utils';
  *  @param options.default that will define the initial value of the field, this option allows a value or a function
  *  @param options.immutable that will define this field as immutable. Ottoman prevents you from changing immutable fields if the schema as configure like strict
  */
-export abstract class CoreType extends IOttomanType {
+export abstract class CoreType extends IType {
   protected constructor(name: string, typeName: string, public options?: CoreTypeOptions) {
     super(name, typeName);
     this.name = name;

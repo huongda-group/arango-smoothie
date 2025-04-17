@@ -1,9 +1,8 @@
-import { CoreType } from './core-type';
-import { generateUUID } from '../../utils/generate-uuid';
-import { is } from '../../utils';
-import { BuildSchemaError, ValidationError } from '../errors';
-import { AutoFunction, CoreTypeOptions } from '../interfaces/schema.types';
-import { CAST_STRATEGY, checkCastStrategy } from '../../utils/cast-strategy';
+import { AutoFunction, CAST_STRATEGY, CoreType, CoreTypeOptions } from './core';
+import Utils from '../../utils';
+import BuildSchemaError from "../error/build-schema";
+import ValidationError from "../error/validation";
+import { v4 as uuidv4 } from 'uuid';
 
 type FunctionsString = () => string[];
 
@@ -175,7 +174,7 @@ export interface StringTypeOptions extends CoreTypeOptions {
  * })
  * ```
  */
-export class StringType extends CoreType {
+export default class StringType extends CoreType {
   constructor(name: string, public options = {} as StringTypeOptions) {
     super(name, StringType.sName, options);
     this._checkIntegrity();
@@ -202,16 +201,18 @@ export class StringType extends CoreType {
   private get trim(): boolean {
     return !!this.options.trim;
   }
+
   private get minLength(): number | undefined {
     return this.options.minLength;
   }
+
   private get maxLength(): number | undefined {
     return this.options.maxLength;
   }
 
   buildDefault(): string | undefined {
     if (this.auto === 'uuid') {
-      return generateUUID();
+      return uuidv4();
     }
     const _value = super.buildDefault();
     return typeof _value === 'undefined' ? _value : String(_value);
@@ -222,7 +223,7 @@ export class StringType extends CoreType {
       return value;
     }
     let castedValue = String(value);
-    if (is(castedValue, String) && !is(value, Object)) {
+    if (Utils.is(castedValue, String) && !Utils.is(value, Object)) {
       if (this.lowercase) {
         castedValue = castedValue.toLowerCase();
       }
@@ -234,12 +235,12 @@ export class StringType extends CoreType {
       }
       return castedValue;
     }
-    return checkCastStrategy(value, strategy, this);
+    return Utils.checkCastStrategy(value, strategy, this);
   }
 
-  validate(value: unknown, strategy) {
+  validate(value: unknown, strategy: any) {
     super.validate(value, strategy);
-    const _wrongType = this.isStrictStrategy(strategy) ? !is(value, String) : is(value, Object);
+    const _wrongType = this.isStrictStrategy(strategy) ? !Utils.is(value, String) : Utils.is(value, Object);
     if (_wrongType) {
       throw new ValidationError(`Property '${this.name}' must be of type '${this.typeName}'`);
     }
@@ -269,14 +270,14 @@ export class StringType extends CoreType {
 
   private _checkMinLength(value: string, errors: string[]): void {
     const length = this.minLength as any;
-    if (is(length, Number) && value.length < length) {
+    if (Utils.is(length, Number) && value.length < length) {
       errors.push(`Property '${this.name}' is shorter than the minimum allowed length '${length}'`);
     }
   }
 
   private _checkMaxLength(value: string, errors: string[]): void {
     const length = this.maxLength as any;
-    if (is(length, Number) && value.length > length) {
+    if (Utils.is(length, Number) && value.length > length) {
       errors.push(`Property '${this.name}' is longer than the maximum allowed length '${length}'`);
     }
   }
@@ -300,7 +301,7 @@ export class StringType extends CoreType {
   }
 
   isEmpty(value: string): boolean {
-    return [, null, ''].includes(value);
+    return [undefined, null, ''].includes(value);
   }
 }
 
