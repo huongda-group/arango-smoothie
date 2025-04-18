@@ -1,19 +1,8 @@
-import {
-  ArrayType,
-  arrayTypeFactory,
-  BooleanType,
-  booleanTypeFactory,
-  DateType,
-  dateTypeFactory,
-  EmbedType,
-  embedTypeFactory,
-  MixedType,
-  mixedTypeFactory,
-  NumberType,
-  numberTypeFactory,
-  ReferenceType,
-  referenceTypeFactory
-} from './types';
+import ArrayType, { arrayTypeFactory } from "./types/array";
+import BooleanType, { booleanTypeFactory } from "./types/boolean";
+import DateType, { dateTypeFactory } from "./types/date";
+import MixedType, { mixedTypeFactory } from "./types/mixed";
+import NumberType, { numberTypeFactory } from "./types/number";
 import StringType, { stringTypeFactory } from './types/string';
 import { SchemaIndex, SchemaQuery } from '../model/index/types/index.types';
 import { getGlobalPlugins } from '../plugins/global-plugin-handler';
@@ -53,8 +42,6 @@ export default class Schema {
     Number: numberTypeFactory,
     Date: dateTypeFactory,
     Array: arrayTypeFactory,
-    Reference: referenceTypeFactory,
-    Embed: embedTypeFactory,
     Mixed: mixedTypeFactory,
   };
   static Types: SupportTypes = {
@@ -63,8 +50,6 @@ export default class Schema {
     Number: NumberType.prototype,
     Date: DateType.prototype,
     Array: ArrayType.prototype,
-    Reference: ReferenceType.prototype,
-    Embed: EmbedType.prototype,
     Mixed: MixedType.prototype,
   };
   static validators: CustomValidations = {};
@@ -199,17 +184,9 @@ export default class Schema {
     for (const key in this.fields) {
       const field = this.fields[key];
       if (typeof obj[field.name] === 'undefined' && field instanceof CoreType) {
-        if (field instanceof EmbedType) {
-          const _val = {};
-          (field as EmbedType).schema.applyDefaultsToObject(_val);
-          if (Object.keys(_val).length > 0) {
-            obj[field.name] = _val;
-          }
-        } else {
-          const _val = field.buildDefault();
-          if (typeof _val !== 'undefined') {
-            obj[field.name] = _val;
-          }
+        const _val = field.buildDefault();
+        if (typeof _val !== 'undefined') {
+          obj[field.name] = _val;
         }
       }
     }

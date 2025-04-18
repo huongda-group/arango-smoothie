@@ -17,7 +17,16 @@ const checkCastStrategy = (value: unknown, strategy: CAST_STRATEGY, type: CoreTy
   }
 };
 
+const isNumber = (val: unknown) => typeof val === 'number' && val === val;
+const isDateValid = (val) => !Number.isNaN(new Date(val).valueOf());
+const ensureArrayItemsType = (array, field, strategy) => array.map((item) => ensureTypes(item, field, strategy));
+
+
 export default {
   is,
-  checkCastStrategy
+  checkCastStrategy,
+  isNumber,
+  isDateValid,
+  ensureArrayItemsType
 }
+
